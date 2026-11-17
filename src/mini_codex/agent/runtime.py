@@ -1,6 +1,7 @@
 from mini_codex.model.client import ModelClient
 from mini_codex.model.messages import Message
 from mini_codex.tools.registry import ToolRegistry
+from mini_codex.tools.executor import ToolExecutor
 
 
 class Agent:
@@ -14,6 +15,7 @@ class Agent:
         self.model = model
         self.tools = tools
         self.max_steps = max_steps
+        self.tool_executor = ToolExecutor(tools)
 
     def run(self, user_input: str) -> str:
 
@@ -47,13 +49,13 @@ class Agent:
             # 6. 执行所有 Tool Calls
             for tool_call in response.tool_calls:
 
-                result = self.tools.execute(tool_call)
+                result = self.tool_executor.execute(tool_call)
 
                 # 7. 把工具结果加入上下文
                 messages.append(
                     Message(
                         role="tool",
-                        content=result,
+                        content=result.to_message_content(),
                         tool_call_id=tool_call.id,
                     )
                 )

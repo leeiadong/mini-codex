@@ -5,7 +5,12 @@ from mini_codex.model.messages import (
     ToolCall,
 )
 from mini_codex.tools.registry import ToolRegistry
+from pydantic import BaseModel, Field
+from mini_codex.tools.definition import ToolDefinition
 
+class CalculatorArgs(BaseModel):
+    a: int = Field(description="First number")
+    b: int = Field(description="Second number")
 
 class MockModel:
 
@@ -49,10 +54,17 @@ def test_agent_tool_call():
     # 3. 注册工具
     tools = ToolRegistry()
 
-    def calculator(args):
-        return str(args["a"] + args["b"])
+    def calculator(a: int, b: int) -> str:
+        return str(a + b)
 
-    tools.register("calculator", calculator)
+    tools.register(
+        ToolDefinition(
+            name="calculator",
+            description="Calculate the sum of two numbers",
+            args_model=CalculatorArgs,
+            function=calculator,
+        )
+    )
 
     # 4. 创建 Agent
     agent = Agent(
@@ -98,9 +110,16 @@ def test_agent_preserves_message_history():
 
     tools = ToolRegistry()
 
+    def calculator(a: int, b: int) -> str:
+        return str(a + b)
+
     tools.register(
-        "calculator",
-        lambda args: str(args["a"] + args["b"]),
+        ToolDefinition(
+            name="calculator",
+            description="Calculate the sum of two numbers",
+            args_model=CalculatorArgs,
+            function=calculator,
+        )
     )
 
     agent = Agent(model=model, tools=tools)
