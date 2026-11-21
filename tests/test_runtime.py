@@ -18,7 +18,7 @@ class MockModel:
         self.responses = responses
         self.calls = []
 
-    def complete(self, messages: list[Message]) -> ModelResponse:
+    def complete(self, messages: list[Message], tools: list[dict] | None = None) -> ModelResponse:
 
         self.calls.append(list(messages))
 

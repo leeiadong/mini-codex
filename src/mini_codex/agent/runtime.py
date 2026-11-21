@@ -31,7 +31,7 @@ class Agent:
         for step in range(self.max_steps):
 
             # 3. 调用模型
-            response = self.model.complete(messages)
+            response = self.model.complete(messages, tools=self.tools.get_schemas())
 
             # 4. 保存 Assistant Message
             assistant_message = Message(

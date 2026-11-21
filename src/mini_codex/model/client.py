@@ -12,5 +12,6 @@ class ModelClient(Protocol):
     def complete(
         self,
         messages: list[Message],
+        tools: list[dict] | None = None,
     ) -> ModelResponse:
         ...
