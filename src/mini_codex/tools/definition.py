@@ -22,12 +22,3 @@ class ToolDefinition:
                 "parameters": self.args_model.model_json_schema(),
             },
         }
-
-
-
-from pydantic import BaseModel, Field
-
-
-class CalculatorArgs(BaseModel):
-    a: float = Field(description="First number")
-    b: float = Field(description="Second number")
