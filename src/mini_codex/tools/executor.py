@@ -25,6 +25,9 @@ class ToolExecutor:
             # 3. 执行工具
             output = tool.function(**arguments.model_dump())
 
+            if isinstance(output, ToolResult):
+                return output
+
             # 4. 返回成功结果
             return ToolResult(
                 tool_name=tool.name,

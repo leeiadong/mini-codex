@@ -3,6 +3,10 @@ from mini_codex.model.messages import Message
 from mini_codex.tools.registry import ToolRegistry
 from mini_codex.tools.executor import ToolExecutor
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Agent:
 
@@ -30,8 +34,19 @@ class Agent:
         # 2. Agent Loop
         for step in range(self.max_steps):
 
+            logger.info(
+                "Step %d/%d: Calling model",
+                step + 1,
+                self.max_steps,
+            )
+
             # 3. 调用模型
             response = self.model.complete(messages, tools=self.tools.get_schemas())
+
+            logger.info(
+                "Model returned %d tool call(s)",
+                len(response.tool_calls),
+            )
 
             # 4. 保存 Assistant Message
             assistant_message = Message(
@@ -49,7 +64,21 @@ class Agent:
             # 6. 执行所有 Tool Calls
             for tool_call in response.tool_calls:
 
+                logger.info(
+                    "Executing tool: %s (call_id=%s)",
+                    tool_call.name,
+                    tool_call.id,
+                )
+
                 result = self.tool_executor.execute(tool_call)
+
+                logger.info(
+                    "Tool finished: name=%s, success=%s, exit_code=%s, output_chars=%d",
+                    result.tool_name,
+                    result.success,
+                    result.exit_code,
+                    len(result.output),
+                )
 
                 # 7. 把工具结果加入上下文
                 messages.append(
@@ -59,6 +88,8 @@ class Agent:
                         tool_call_id=tool_call.id,
                     )
                 )
+
+        logger.info("Agent task completed")
 
         # 8. 超过最大执行步数
         raise RuntimeError(

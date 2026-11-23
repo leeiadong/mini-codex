@@ -9,9 +9,15 @@ class ToolResult:
     success: bool
     output: str
     error: str | None = None
+    exit_code: int | None = None
 
     def to_message_content(self) -> str:
         if self.success:
             return self.output
 
-        return f"Tool execution failed: {self.error}"
+        message = f"Tool execution failed: {self.error}"
+
+        if self.output:
+            message += f"\n{self.output}"
+
+        return message

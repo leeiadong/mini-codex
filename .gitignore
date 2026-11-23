@@ -9,3 +9,5 @@ build/
 src/mini_codex.egg-info
 scripts/
 </import>
+.workbuddy/
+plan.md
