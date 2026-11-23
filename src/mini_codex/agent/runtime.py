@@ -59,6 +59,7 @@ class Agent:
 
             # 5. 没有 Tool Call，说明模型已经完成任务
             if not response.tool_calls:
+                logger.info("Agent task completed")
                 return response.content or ""
 
             # 6. 执行所有 Tool Calls
@@ -88,8 +89,6 @@ class Agent:
                         tool_call_id=tool_call.id,
                     )
                 )
-
-        logger.info("Agent task completed")
 
         # 8. 超过最大执行步数
         raise RuntimeError(
