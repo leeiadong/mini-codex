@@ -12,3 +12,4 @@ scripts/
 .workbuddy/
 plan.md
 workspace/
+tests/
