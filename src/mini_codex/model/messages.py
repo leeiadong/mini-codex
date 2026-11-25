@@ -10,7 +10,7 @@ class ToolCall:
 @dataclass
 class Message:
     role: str
-    content: str
+    content: str | None = None
     tool_calls: list[ToolCall] = field(default_factory=list)
     tool_call_id: str | None = None
 
