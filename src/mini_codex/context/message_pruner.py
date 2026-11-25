@@ -65,20 +65,43 @@ class MessagePruner:
 
         groups = self.group_messages(messages)
 
-        # Preserve the original user request as the task instruction.
-        pinned_group = groups[0] if groups[0][0].role == "user" else []
+        # Preserve leading system messages and the initial user task.
+        pinned_count = 0
 
-        pinned_tokens = self.token_counter.estimate_messages(pinned_group)
+        while (
+            pinned_count < len(groups)
+            and groups[pinned_count][0].role == "system"
+        ):
+            pinned_count += 1
+
+        if (
+            pinned_count < len(groups)
+            and groups[pinned_count][0].role == "user"
+        ):
+            pinned_count += 1
+
+        pinned_groups = groups[:pinned_count]
+        remaining_groups = groups[pinned_count:]
+
+        pinned_tokens = self.token_counter.estimate_messages(
+            [
+                message
+                for group in pinned_groups
+                for message in group
+            ]
+        )
+
         if pinned_tokens > max_tokens:
             raise ValueError(
-                "The initial user message exceeds the available context budget"
+                "initial user message exceeds the available context budget "
+                "when preserving pinned system messages"
             )
 
         selected_groups = []
         used_tokens = pinned_tokens
 
         # Keep the newest groups first, then restore chronological order.
-        for group in reversed(groups[len(pinned_group):]):
+        for group in reversed(remaining_groups):
             group_tokens = self.token_counter.estimate_messages(group)
 
             if used_tokens + group_tokens > max_tokens:
@@ -91,6 +114,6 @@ class MessagePruner:
 
         return [
             message
-            for group in [pinned_group, *selected_groups]
+            for group in [*pinned_groups, *selected_groups]
             for message in group
         ]
