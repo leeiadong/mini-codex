@@ -8,7 +8,6 @@ build/
 .DS_Store
 src/mini_codex.egg-info
 scripts/
-</import>
 .workbuddy/
 plan.md
 workspace/
