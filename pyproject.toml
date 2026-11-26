@@ -12,6 +12,7 @@ dependencies = [
     "pydantic",
     "python-dotenv",
     "typer",
+    "redis",
 ]
 
 [project.optional-dependencies]

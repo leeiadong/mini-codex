@@ -2,6 +2,7 @@ from mini_codex.model.client import ModelClient
 from mini_codex.model.messages import Message
 from mini_codex.tools.registry import ToolRegistry
 from mini_codex.tools.executor import ToolExecutor
+from mini_codex.context.manager import ContextManager
 
 import logging
 
@@ -15,11 +16,13 @@ class Agent:
         model: ModelClient,
         tools: ToolRegistry,
         max_steps: int = 10,
+        context_manager: ContextManager | None = None,
     ):
         self.model = model
         self.tools = tools
         self.max_steps = max_steps
         self.tool_executor = ToolExecutor(tools)
+        self.context_manager = context_manager
 
     def run(self, user_input: str) -> str:
 
@@ -41,7 +44,20 @@ class Agent:
             )
 
             # 3. 调用模型
-            response = self.model.complete(messages, tools=self.tools.get_schemas())
+            # response = self.model.complete(messages, tools=self.tools.get_schemas())
+            tool_schemas = self.tools.get_schemas()
+            if self.context_manager is not None:
+                prepared_messages = self.context_manager.prepare(
+                    messages=messages,
+                    tools=tool_schemas,
+                )
+            else:
+                prepared_messages = messages
+
+            response = self.model.complete(
+                prepared_messages,
+                tools=tool_schemas,
+            )
 
             logger.info(
                 "Model returned %d tool call(s)",
